@@ -119,15 +119,37 @@
           <div class="aside-inner">
             <section class="preview-section">
               <div class="preview-section-head">
-                <ion-icon :icon="eyeOutline" aria-hidden="true" />
-                <span>Prontuário</span>
+                <div class="preview-section-head-label">
+                  <ion-icon :icon="eyeOutline" aria-hidden="true" />
+                  <span>Prontuário</span>
+                </div>
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  class="preview-copy-btn"
+                  aria-label="Copiar prontuário (HTML)"
+                  @click="copyHtmlToClipboard(rendered.clinicalData, 'Prontuário')"
+                >
+                  <ion-icon slot="icon-only" :icon="copyOutline" aria-hidden="true" />
+                </ion-button>
               </div>
               <div class="preview-card preview-html" v-html="rendered.clinicalData"></div>
             </section>
             <section class="preview-section">
               <div class="preview-section-head">
-                <ion-icon :icon="documentTextOutline" aria-hidden="true" />
-                <span>Receituário</span>
+                <div class="preview-section-head-label">
+                  <ion-icon :icon="documentTextOutline" aria-hidden="true" />
+                  <span>Receituário</span>
+                </div>
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  class="preview-copy-btn"
+                  aria-label="Copiar receituário (HTML)"
+                  @click="copyHtmlToClipboard(rendered.homePrescription, 'Receituário')"
+                >
+                  <ion-icon slot="icon-only" :icon="copyOutline" aria-hidden="true" />
+                </ion-button>
               </div>
               <div class="preview-card preview-html" v-html="rendered.homePrescription"></div>
             </section>
@@ -154,8 +176,9 @@ import {
   IonIcon,
   IonSelect,
   IonSelectOption,
+  toastController,
 } from '@ionic/vue';
-import { documentTextOutline, eyeOutline, medkitOutline, readerOutline } from 'ionicons/icons';
+import { copyOutline, documentTextOutline, eyeOutline, medkitOutline, readerOutline } from 'ionicons/icons';
 import { anamnesisAndPhysicalExam } from '@/data/anamnesis-and-physical-exam/AnamnesisAndPhysicalExam';
 import { homePrescriptions } from '@/data/prescriptions/HomePrescriptions';
 import { servicePrescriptions } from '@/data/prescriptions/ServicePrescriptions';
@@ -199,6 +222,51 @@ function currentServiceVia(item: ServicePrescriptionItem): string {
 
 function setServiceVia(item: ServicePrescriptionItem, via: string) {
   serviceViaSelection.value = { ...serviceViaSelection.value, [item.name]: via };
+}
+
+function htmlToPlain(html: string): string {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent?.replace(/\s+\n/g, '\n').trim() ?? '';
+}
+
+async function copyHtmlToClipboard(html: string, label: string) {
+  const trimmed = html.trim();
+  if (!trimmed) {
+    const toast = await toastController.create({
+      message: 'Nada para copiar',
+      duration: 2000,
+      color: 'medium',
+    });
+    await toast.present();
+    return;
+  }
+  const plain = htmlToPlain(trimmed);
+  try {
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        'text/html': new Blob([trimmed], { type: 'text/html' }),
+        'text/plain': new Blob([plain], { type: 'text/plain' }),
+      }),
+    ]);
+  } catch {
+    try {
+      await navigator.clipboard.writeText(plain);
+    } catch {
+      const toast = await toastController.create({
+        message: 'Não foi possível copiar',
+        duration: 2500,
+        color: 'danger',
+      });
+      await toast.present();
+      return;
+    }
+  }
+  const toast = await toastController.create({
+    message: `${label} copiado (HTML)`,
+    duration: 2000,
+    color: 'success',
+  });
+  await toast.present();
 }
 
 const commands = {
@@ -358,6 +426,7 @@ onMounted(() => {
 .preview-section-head {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
   font-size: 0.7rem;
@@ -365,6 +434,20 @@ onMounted(() => {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ion-color-medium);
+}
+
+.preview-section-head-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.preview-copy-btn {
+  --padding-start: 6px;
+  --padding-end: 6px;
+  margin: 0;
+  flex-shrink: 0;
 }
 
 .preview-card {
