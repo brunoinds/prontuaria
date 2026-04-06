@@ -1,6 +1,5 @@
 
-
-const servicePrescriptions = [
+export const servicePrescriptions = [
     {
         name: 'SF 0.9%',
         unit: 'ML',

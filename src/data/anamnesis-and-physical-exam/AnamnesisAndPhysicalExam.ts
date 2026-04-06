@@ -1,5 +1,5 @@
 
-const anamnesisAndPhysicalExam = [
+export const anamnesisAndPhysicalExam = [
     {
         title: '🔍 Ectoscopia',
         text: `BEG, LOTE, CORADO, HIDRATADO, ANICTÉRICO, ACIANÓTICO.`

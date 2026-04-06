@@ -1,6 +1,6 @@
 
 
-const homePrescriptions = [
+export const homePrescriptions = [
     {
         diagnosis: 'M545',
         text: `
