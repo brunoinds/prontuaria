@@ -9,10 +9,9 @@
       <article class="viewport">
         <main class="viewport-main">
           <header class="main-header">
-            <h1 class="main-title">Montagem rápida</h1>
-            <p class="main-subtitle">
-              Toque em Add para incluir no texto à direita. Use os acordeões para focar em cada bloco.
-            </p>
+            <h1 class="main-title">
+              <ion-button slot="end" fill="solid" @click="commands.resetAll()">Novo Paciente</ion-button>
+            </h1>
           </header>
 
           <ion-accordion-group v-model="openSections" :multiple="true" class="sections-accordion">
@@ -224,11 +223,23 @@ const commands = {
     dynamicContent.value.clinicalData.conduct =
       'ORIENTO SINAIS DE ALARME E RETORNO SE PRESENÇA DOS MESMOS. ORIENTO RETORNO VIA UBS PARA SEGUIMENTO. PRESCREVO SINTOMÁTICOS. PACIENTE COMPREENDE DIAGNÓSTICO E TRATAMENTO E COMPACTUA.';
   },
+  resetAll: () => {
+
+    dynamicContent.value.clinicalData.servicePrescription = '';
+    dynamicContent.value.clinicalData.homePrescription = '';
+    dynamicContent.value.clinicalData.physicalExam = '';
+    dynamicContent.value.clinicalData.diagnosis = '';
+    dynamicContent.value.clinicalData.diagnosis = '';
+    dynamicContent.value.clinicalData.servicePrescription = '';
+    dynamicContent.value.clinicalData.homePrescription = '';
+
+    commands.resetAnamnesis();
+    commands.resetConduct();
+  },
 };
 
 onMounted(() => {
-  commands.resetAnamnesis();
-  commands.resetConduct();
+  commands.resetAll();
 });
 </script>
 
