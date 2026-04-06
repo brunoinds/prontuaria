@@ -65,6 +65,19 @@
                       <h3 class="item-title">{{ item.name }}</h3>
                       <p class="item-meta">{{ item.dosis }} {{ item.unit }}</p>
                     </ion-label>
+                    <ion-select
+                      class="via-select"
+                      label="Via"
+                      :aria-label="'Via de administração — ' + item.name"
+                      interface="popover"
+                      :value="currentServiceVia(item)"
+                      @ion-change="(ev: CustomEvent) => setServiceVia(item, String(ev.detail.value))"
+                      @click.stop
+                    >
+                      <ion-select-option v-for="via in item.vias" :key="via" :value="via">
+                        {{ via }}
+                      </ion-select-option>
+                    </ion-select>
                     <ion-button slot="end" size="small" fill="solid" @click.stop="commands.addServicePrescription(item)">
                       Add
                     </ion-button>
@@ -140,6 +153,8 @@ import {
   IonList,
   IonButton,
   IonIcon,
+  IonSelect,
+  IonSelectOption,
 } from '@ionic/vue';
 import { documentTextOutline, eyeOutline, medkitOutline, readerOutline } from 'ionicons/icons';
 import { anamnesisAndPhysicalExam } from '@/data/anamnesis-and-physical-exam/AnamnesisAndPhysicalExam';
@@ -164,7 +179,7 @@ const rendered = computed(() => {
   return {
     clinicalData: (() => {
       let html = '';
-      html += `${dynamicContent.value.clinicalData.anamnesis} <br><br>AO EXAME FÍSICO: <br>${dynamicContent.value.clinicalData.physicalExam} <br><br>HD: ${dynamicContent.value.clinicalData.diagnosis} <br><br>CONDUTA:<br>${dynamicContent.value.clinicalData.conduct} <br>`;
+      html += `${dynamicContent.value.clinicalData.anamnesis} <br><br><b>AO EXAME FÍSICO:</b> <br>${dynamicContent.value.clinicalData.physicalExam} <br><br><b>HD:</b> ${dynamicContent.value.clinicalData.diagnosis} <br><br><b>CONDUTA:</b><br>${dynamicContent.value.clinicalData.conduct} <br>`;
       if (dynamicContent.value.clinicalData.servicePrescription) {
         html += `<br><br><b><u>PRESCRIÇÃO NA UNIDADE:</u><ul>${dynamicContent.value.clinicalData.servicePrescription}</ul></b>`;
       }
@@ -177,13 +192,24 @@ const rendered = computed(() => {
 type ServicePrescriptionItem = (typeof servicePrescriptions)[number];
 type HomePrescriptionItem = (typeof homePrescriptions)[number];
 
+const serviceViaSelection = ref<Record<string, string>>({});
+
+function currentServiceVia(item: ServicePrescriptionItem): string {
+  return serviceViaSelection.value[item.name] ?? item.vias[0];
+}
+
+function setServiceVia(item: ServicePrescriptionItem, via: string) {
+  serviceViaSelection.value = { ...serviceViaSelection.value, [item.name]: via };
+}
+
 const commands = {
   addPhysicalExam: (data: string) => {
     dynamicContent.value.clinicalData.physicalExam += data + '<br>';
   },
 
   addServicePrescription: (item: ServicePrescriptionItem) => {
-    dynamicContent.value.clinicalData.servicePrescription += `<li>${item.name} ${item.dosis} ${item.unit}</li>`;
+    const via = currentServiceVia(item);
+    dynamicContent.value.clinicalData.servicePrescription += `<li>${item.name} ${item.dosis} ${item.unit} — ${via}</li>`;
   },
 
   addHomePrescription: (item: HomePrescriptionItem) => {
@@ -285,6 +311,12 @@ onMounted(() => {
   margin: 0.25rem 0 0;
   font-size: 0.8rem;
   color: var(--ion-color-medium);
+}
+
+.via-select {
+  max-width: 5.5rem;
+  margin-inline-end: 0.25rem;
+  font-size: 0.8rem;
 }
 
 .viewport-aside {
