@@ -91,7 +91,7 @@
                     @click="commands.addHomePrescription(item)"
                   >
                     <ion-label>
-                      <h3 class="item-title">CID {{ item.diagnosis }}</h3>
+                      <h3 class="item-title">{{ item.diagnosis }}</h3>
                     </ion-label>
                     <ion-button slot="end" size="small" fill="solid" @click.stop="commands.addHomePrescription(item)">
                       Add
